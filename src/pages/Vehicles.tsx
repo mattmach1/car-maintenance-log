@@ -1,25 +1,15 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Card, CardHeader, CardTitle, CardContent,} from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,} from "@/components/ui/alert-dialog";
 import { MoreHorizontal } from "lucide-react";
+import { useEffect } from "react";
+import { loadVehicles, saveVehicles } from "@/lib/storage";
 
 type Vehicle = {
   id: string;
@@ -33,7 +23,7 @@ type Vehicle = {
 const YEARS = Array.from({ length: 75 }, (_, i) => new Date().getFullYear() - i);
 
 export default function Vehicles() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>(() => loadVehicles<Vehicle>());
   const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -45,6 +35,14 @@ export default function Vehicles() {
   const [year, setYear] = useState<number | undefined>(undefined);
   const [currentMileage, setCurrentMileage] = useState<number | undefined>(undefined);
   const [nickname, setNickname] = useState("");
+
+  useEffect(() => {
+    setVehicles(loadVehicles<Vehicle>());
+  }, []);
+
+  useEffect(() => {
+    saveVehicles(vehicles);
+  }, [vehicles]);
 
   const canSubmit = useMemo(() => {
     return (
