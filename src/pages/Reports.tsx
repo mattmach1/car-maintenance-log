@@ -1,3 +1,3 @@
 export default function Reports() {
-  return <div>Reports Page</div>;
+  return <p className="text-sm text-muted-foreground">Reports coming soon.</p>;
 }
