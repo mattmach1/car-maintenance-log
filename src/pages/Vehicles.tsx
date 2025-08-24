@@ -17,6 +17,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,} from "@/components/ui/alert-dialog";
+import { MoreHorizontal } from "lucide-react";
 
 type Vehicle = {
   id: string;
@@ -32,6 +35,9 @@ const YEARS = Array.from({ length: 75 }, (_, i) => new Date().getFullYear() - i)
 export default function Vehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [open, setOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
 
    // simple form state (UI only)
   const [make, setMake] = useState("");
@@ -58,39 +64,85 @@ export default function Vehicles() {
     setYear(undefined);
     setCurrentMileage(undefined);
     setNickname("");
+    setEditingId(null);
   }
 
-  function handleAddVehicle() {
+  function startCreate() {
+    resetForm();
+    setOpen(true);
+  }
+
+  function startEdit(v: Vehicle) {
+    setEditingId(v.id);
+    setMake(v.make);
+    setModel(v.model);
+    setYear(v.year);
+    setCurrentMileage(v.currentMileage);
+    setNickname(v.nickname ?? "");
+    setOpen(true);
+  }
+
+  function handleSave() {
     if (!canSubmit) return;
 
-    const v: Vehicle = {
-      id: crypto.randomUUID(),
-      make: make.trim(),
-      model: model.trim(),
-      year: year!,
-      currentMileage: currentMileage!,
-      nickname: nickname.trim() || undefined,
-    };
+    if (editingId) {
+      // update
+      setVehicles((prev) =>
+        prev.map((v) =>
+          v.id === editingId
+            ? {
+                ...v,
+                make: make.trim(),
+                model: model.trim(),
+                year: year!,
+                currentMileage: currentMileage!,
+                nickname: nickname.trim() || undefined,
+              }
+            : v
+        )
+      );
+    } else {
+      // create
+      const v: Vehicle = {
+        id: crypto.randomUUID(),
+        make: make.trim(),
+        model: model.trim(),
+        year: year!,
+        currentMileage: currentMileage!,
+        nickname: nickname.trim() || undefined,
+      };
+      setVehicles((prev) => [v, ...prev]);
+    }
 
-    setVehicles((prev) => [v, ...prev]);
     setOpen(false);
     resetForm();
   }
 
-   return (
+
+   function confirmDelete(id: string) {
+    setDeleteId(id);
+  }
+
+  function handleDelete() {
+    if (!deleteId) return;
+    setVehicles((prev) => prev.filter((v) => v.id !== deleteId));
+    setDeleteId(null);
+  }
+
+  return (
     <div className="grid gap-4">
       {/* Header row */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Vehicles</h2>
 
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(o) => (o ? startCreate() : setOpen(false))}>
           <DialogTrigger asChild>
-            <Button>Add Vehicle</Button>
+            <Button onClick={startCreate}>Add Vehicle</Button>
           </DialogTrigger>
 
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Add Vehicle</DialogTitle>
+              <DialogTitle>{editingId ? "Edit Vehicle" : "Add Vehicle"}</DialogTitle>
             </DialogHeader>
 
             <div className="grid gap-3">
@@ -129,7 +181,7 @@ export default function Vehicles() {
                 />
               </div>
 
-              {/* Year + Mileage (two-column on md+) */}
+              {/* Year + Mileage */}
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="grid gap-1.5">
                   <Label>Year</Label>
@@ -159,7 +211,9 @@ export default function Vehicles() {
                     value={currentMileage?.toString() ?? ""}
                     onChange={(e) =>
                       setCurrentMileage(
-                        e.target.value === "" ? undefined : parseInt(e.target.value.replace(/\D/g, ""), 10)
+                        e.target.value === ""
+                          ? undefined
+                          : parseInt(e.target.value.replace(/\D/g, ""), 10)
                       )
                     }
                     required
@@ -169,10 +223,10 @@ export default function Vehicles() {
             </div>
 
             <DialogFooter className="mt-2">
-              <Button variant="ghost" onClick={() => setOpen(false)}>
+              <Button variant="ghost" onClick={() => { setOpen(false); resetForm(); }}>
                 Cancel
               </Button>
-              <Button disabled={!canSubmit} onClick={handleAddVehicle}>
+              <Button disabled={!canSubmit} onClick={handleSave}>
                 Save
               </Button>
             </DialogFooter>
@@ -193,18 +247,52 @@ export default function Vehicles() {
       <div className="grid gap-3">
         {vehicles.map((v) => (
           <Card key={v.id} className="hover:shadow-sm transition">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 flex-row items-start justify-between">
               <CardTitle className="text-base">
                 {v.nickname ? `${v.nickname} • ` : ""}
                 {v.year} {v.make} {v.model}
               </CardTitle>
+
+              {/* Actions menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Actions">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem onClick={() => startEdit(v)}>Edit</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-600" onClick={() => confirmDelete(v.id)}>
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </CardHeader>
+
             <CardContent className="text-sm text-muted-foreground">
               Odometer: <span className="font-medium">{v.currentMileage.toLocaleString()}</span> miles
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Delete confirm */}
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete vehicle?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the vehicle and its data from the current session.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-600/90" onClick={handleDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
