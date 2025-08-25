@@ -264,15 +264,16 @@ function handleExportCsv() {
   return (
     <div className="grid gap-4">
       {/* Header row */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">Service Records</h2>
-
+        
+        {/* Controls group */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         {/* Vehicle filter */}
-        <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Filter:</span>
           <Select value={vehicleFilter} onValueChange={setVehicleFilter}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="All vehicles" />
             </SelectTrigger>
             <SelectContent>
@@ -298,7 +299,7 @@ function handleExportCsv() {
           </DialogTrigger>
           
 
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-lg max-w-[min(100vw-1rem,36rem)] max-h-[85dvh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingId ? "Edit Record" : "Add Record"}
