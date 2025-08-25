@@ -97,7 +97,7 @@ export default function Records() {
   // vehicles (to populate vehicle selector)
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   // records state with localStorage persistence
-  const [records, setRecords] = useState<ServiceRecord[]>([]);
+  const [records, setRecords] = useState<ServiceRecord[]>(() => loadRecords<ServiceRecord>());
   // dialogs
   const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -116,7 +116,7 @@ export default function Records() {
   // load vehicles + records on mount
   useEffect(() => {
     setVehicles(loadVehicles<Vehicle>());
-    setRecords(loadRecords<ServiceRecord>());
+    //setRecords(loadRecords<ServiceRecord>());
   }, []);
 
   // persist records whenever they change

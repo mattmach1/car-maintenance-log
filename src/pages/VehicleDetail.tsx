@@ -40,7 +40,7 @@ export default function VehicleDetail() {
   const navigate = useNavigate();
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
-  const [records, setRecords] = useState<ServiceRecord[]>([]);
+  const [records, setRecords] = useState<ServiceRecord[]>(() => loadRecords<ServiceRecord>());
 
   // dialogs/state
   const [open, setOpen] = useState(false);
