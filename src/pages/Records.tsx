@@ -38,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MoreHorizontal } from "lucide-react";
 import { loadVehicles, loadRecords, saveRecords } from "@/lib/storage";
 import { loadVehicleFilter, saveVehicleFilter } from "@/lib/storage";
-import { toCsv, downloadCsv } from "@/lib/csv";
+import { toCsv, downloadCsv, type CsvRow } from "@/lib/csv";
 
 type Vehicle = {
   id: string;
@@ -232,13 +232,14 @@ export default function Records() {
     }`;
   }
 
-  function buildCsvRows(list: ServiceRecord[]) {
+  function buildCsvRows(list: ServiceRecord[]): CsvRow[] {
   return list.map((r) => ({
     Vehicle: vehicleLabel(r.vehicleId),
     Type: TYPES.find((t) => t.value === r.type)?.label ?? r.type,
     Date: r.serviceDate,
     Mileage: r.mileage,
-    CostUSD: typeof r.costCents === "number" ? (r.costCents / 100).toFixed(2) : "",
+    CostUSD:
+      typeof r.costCents === "number" ? (r.costCents / 100).toFixed(2) : "",
     Shop: r.shopName ?? "",
     Notes: r.notes ?? "",
   }));
@@ -285,7 +286,7 @@ function handleExportCsv() {
             </SelectContent>
           </Select>
         </div>
-        
+
          <Button variant="outline" onClick={handleExportCsv}>Export CSV</Button>
 
         <Dialog

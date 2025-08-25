@@ -1,16 +1,22 @@
-export function toCsv(rows: Record<string, string | number | null | undefined>[]) {
+export type CsvValue = string | number | null | undefined;
+export type CsvRow = Record<string, CsvValue>;
+
+export function toCsv(rows: CsvRow[]) {
   if (!rows.length) return "";
   const headers = Object.keys(rows[0]);
-  const escape = (val: string | number | null | undefined) => {
+
+  const escape = (val: CsvValue) => {
     if (val === null || val === undefined) return "";
     const s = String(val);
     // Quote if it contains comma, quote or newline
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
+
   const head = headers.join(",");
   const body = rows
     .map((r) => headers.map((h) => escape(r[h])).join(","))
     .join("\n");
+
   return head + "\n" + body;
 }
 
