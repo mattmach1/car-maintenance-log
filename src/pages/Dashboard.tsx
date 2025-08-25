@@ -76,9 +76,9 @@ export default function Dashboard() {
   }, [vehicles, records, todayISO]);
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {/* Upcoming */}
-      <Card>
+      <Card className="xl:col-span-3">
         <CardHeader>
           <CardTitle>Upcoming</CardTitle>
         </CardHeader>
@@ -167,7 +167,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Spend YTD */}
-      <Card className="md:col-span-2">
+      <Card className="xl:col-span-3">
         <CardHeader>
           <CardTitle>Total Spend (YTD)</CardTitle>
         </CardHeader>

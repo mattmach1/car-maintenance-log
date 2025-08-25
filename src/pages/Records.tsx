@@ -265,7 +265,7 @@ function handleExportCsv() {
     <div className="grid gap-4">
       {/* Header row */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold">Service Records</h2>
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold">Service Records</h2>
         
         {/* Controls group */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -446,7 +446,7 @@ function handleExportCsv() {
       )}
 
       {/* Records list */}
-      <div className="grid gap-3">
+      <div className="grid gap-3 lg:grid-cols-2">
         {visibleRecords.map((r) => (
           <Card key={r.id} className="hover:shadow-sm transition">
             <CardHeader className="pb-2 flex-row items-start justify-between">

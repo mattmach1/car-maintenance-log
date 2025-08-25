@@ -16,8 +16,8 @@ export default function FooterNav() {
   const { pathname } = useLocation();
 
   return (
-    <nav className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto max-w-screen-sm h-14 px-2 grid grid-cols-4 gap-1">
+    <nav className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
+      <div className="mx-auto max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg xl:max-w-5xl h-14 px-2 grid grid-cols-4 gap-1">
         {items.map(({ name, path, icon: Icon }) => {
           const active = pathname === path;
           return (

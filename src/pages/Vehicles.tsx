@@ -132,7 +132,7 @@ export default function Vehicles() {
     <div className="grid gap-4">
       {/* Header row */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Vehicles</h2>
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold">Vehicles</h2>
 
         <Dialog open={open} onOpenChange={(o) => (o ? startCreate() : setOpen(false))}>
           <DialogTrigger asChild>
@@ -243,7 +243,7 @@ export default function Vehicles() {
       )}
 
       {/* Vehicle list */}
-      <div className="grid gap-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {vehicles.map((v) => (
           <Card key={v.id} className="hover:shadow-sm transition">
             <CardHeader className="pb-2 flex-row items-start justify-between">
