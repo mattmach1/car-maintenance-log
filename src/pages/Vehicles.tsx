@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { MoreHorizontal } from "lucide-react";
 import { useEffect } from "react";
 import { loadVehicles, saveVehicles } from "@/lib/storage";
+import { Link } from "react-router-dom";
 
 type Vehicle = {
   id: string;
@@ -247,8 +248,10 @@ export default function Vehicles() {
           <Card key={v.id} className="hover:shadow-sm transition">
             <CardHeader className="pb-2 flex-row items-start justify-between">
               <CardTitle className="text-base">
+                <Link to={`/vehicles/${v.id}`} className="hover:underline">
                 {v.nickname ? `${v.nickname} • ` : ""}
                 {v.year} {v.make} {v.model}
+                </Link>
               </CardTitle>
 
               {/* Actions menu */}
