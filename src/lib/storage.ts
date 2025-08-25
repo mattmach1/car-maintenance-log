@@ -37,3 +37,7 @@ export function saveRecords<T>(records: T[]) {
     console.error("Failed to save records", err);
   }
 }
+
+const FILTER_KEY = "records_vehicle_filter";
+export const loadVehicleFilter = () => localStorage.getItem(FILTER_KEY) ?? "all";
+export const saveVehicleFilter = (val: string) => localStorage.setItem(FILTER_KEY, val);

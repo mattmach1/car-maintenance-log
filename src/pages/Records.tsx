@@ -1,15 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent,} from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,} from "@/components/ui/dialog";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { MoreHorizontal } from "lucide-react";
 import { loadVehicles, loadRecords, saveRecords } from "@/lib/storage";
+import { loadVehicleFilter, saveVehicleFilter } from "@/lib/storage";
 
 type Vehicle = {
   id: string;
@@ -21,9 +49,20 @@ type Vehicle = {
 };
 
 type ServiceType =
-  | "oil_change" | "tire_rotation" | "brake_pads" | "brake_fluid" | "coolant"
-  | "transmission_fluid" | "battery" | "spark_plugs" | "air_filter"
-  | "cabin_filter" | "alignment" | "inspection" | "registration" | "other";
+  | "oil_change"
+  | "tire_rotation"
+  | "brake_pads"
+  | "brake_fluid"
+  | "coolant"
+  | "transmission_fluid"
+  | "battery"
+  | "spark_plugs"
+  | "air_filter"
+  | "cabin_filter"
+  | "alignment"
+  | "inspection"
+  | "registration"
+  | "other";
 
 type ServiceRecord = {
   id: string;
@@ -71,6 +110,7 @@ export default function Records() {
   const [cost, setCost] = useState<string>("");
   const [shopName, setShopName] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
+  const [vehicleFilter, setVehicleFilter] = useState<string>(() => loadVehicleFilter());
 
   // load vehicles + records on mount
   useEffect(() => {
@@ -82,6 +122,8 @@ export default function Records() {
   useEffect(() => {
     saveRecords(records);
   }, [records]);
+
+  useEffect(() => { saveVehicleFilter(vehicleFilter); }, [vehicleFilter]);
 
   const canSubmit = useMemo(() => {
     return (
@@ -107,6 +149,9 @@ export default function Records() {
 
   function startCreate() {
     resetForm();
+    if (vehicleFilter !== "all") {
+      setVehicleId(vehicleFilter);
+    }
     setOpen(true);
   }
 
@@ -181,8 +226,15 @@ export default function Records() {
   function vehicleLabel(id: string) {
     const v = vehicles.find((x) => x.id === id);
     if (!v) return "Unknown vehicle";
-    return `${v.nickname ? v.nickname + " • " : ""}${v.year} ${v.make} ${v.model}`;
+    return `${v.nickname ? v.nickname + " • " : ""}${v.year} ${v.make} ${
+      v.model
+    }`;
   }
+
+  const visibleRecords = useMemo(() => {
+  if (vehicleFilter === "all") return records;
+  return records.filter(r => r.vehicleId === vehicleFilter);
+}, [records, vehicleFilter]);
 
   return (
     <div className="grid gap-4">
@@ -190,14 +242,40 @@ export default function Records() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Service Records</h2>
 
-        <Dialog open={open} onOpenChange={(o) => (o ? startCreate() : setOpen(false))}>
+        {/* Vehicle filter */}
+        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Filter:</span>
+          <Select value={vehicleFilter} onValueChange={setVehicleFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="All vehicles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All vehicles</SelectItem>
+              {vehicles.map((v) => (
+                <SelectItem key={v.id} value={v.id}>
+                  {v.nickname ? `${v.nickname} • ` : ""}
+                  {v.year} {v.make} {v.model}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Dialog
+          open={open}
+          onOpenChange={(o) => (o ? startCreate() : setOpen(false))}
+        >
           <DialogTrigger asChild>
             <Button onClick={startCreate}>Add Record</Button>
           </DialogTrigger>
+          
 
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editingId ? "Edit Record" : "Add Record"}</DialogTitle>
+              <DialogTitle>
+                {editingId ? "Edit Record" : "Add Record"}
+              </DialogTitle>
             </DialogHeader>
 
             <div className="grid gap-3">
@@ -227,7 +305,10 @@ export default function Records() {
               {/* Type */}
               <div className="grid gap-1.5">
                 <Label>Service Type</Label>
-                <Select value={type} onValueChange={(val) => setType(val as ServiceType)}>
+                <Select
+                  value={type}
+                  onValueChange={(val) => setType(val as ServiceType)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Choose type" />
                   </SelectTrigger>
@@ -307,7 +388,13 @@ export default function Records() {
             </div>
 
             <DialogFooter className="mt-2">
-              <Button variant="ghost" onClick={() => { setOpen(false); resetForm(); }}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setOpen(false);
+                  resetForm();
+                }}
+              >
                 Cancel
               </Button>
               <Button disabled={!canSubmit} onClick={handleSave}>
@@ -316,20 +403,23 @@ export default function Records() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Empty state */}
-      {records.length === 0 && (
+      {visibleRecords.length === 0 && (
         <Card>
           <CardContent className="py-6 text-sm text-muted-foreground">
-            No service records yet. Click <span className="font-medium">Add Record</span> to create your first one.
+            No service records yet. Click{" "}
+            <span className="font-medium">Add Record</span> to create your first
+            one.
           </CardContent>
         </Card>
       )}
 
       {/* Records list */}
       <div className="grid gap-3">
-        {records.map((r) => (
+        {visibleRecords.map((r) => (
           <Card key={r.id} className="hover:shadow-sm transition">
             <CardHeader className="pb-2 flex-row items-start justify-between">
               <CardTitle className="text-base">
@@ -344,8 +434,13 @@ export default function Records() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={() => startEdit(r)}>Edit</DropdownMenuItem>
-                  <DropdownMenuItem className="text-red-600" onClick={() => confirmDelete(r.id)}>
+                  <DropdownMenuItem onClick={() => startEdit(r)}>
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-red-600"
+                    onClick={() => confirmDelete(r.id)}
+                  >
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -353,21 +448,41 @@ export default function Records() {
             </CardHeader>
 
             <CardContent className="text-sm text-muted-foreground grid gap-1.5">
-              <div><span className="font-medium">Type:</span> {TYPES.find(t=>t.value===r.type)?.label ?? r.type}</div>
-              <div><span className="font-medium">Date:</span> {r.serviceDate}</div>
-              <div><span className="font-medium">Mileage:</span> {r.mileage.toLocaleString()} miles</div>
+              <div>
+                <span className="font-medium">Type:</span>{" "}
+                {TYPES.find((t) => t.value === r.type)?.label ?? r.type}
+              </div>
+              <div>
+                <span className="font-medium">Date:</span> {r.serviceDate}
+              </div>
+              <div>
+                <span className="font-medium">Mileage:</span>{" "}
+                {r.mileage.toLocaleString()} miles
+              </div>
               {typeof r.costCents === "number" && (
-                <div><span className="font-medium">Cost:</span> ${(r.costCents/100).toFixed(2)}</div>
+                <div>
+                  <span className="font-medium">Cost:</span> $
+                  {(r.costCents / 100).toFixed(2)}
+                </div>
               )}
-              {r.shopName && <div><span className="font-medium">Shop:</span> {r.shopName}</div>}
-              {r.notes && <div className="text-muted-foreground">{r.notes}</div>}
+              {r.shopName && (
+                <div>
+                  <span className="font-medium">Shop:</span> {r.shopName}
+                </div>
+              )}
+              {r.notes && (
+                <div className="text-muted-foreground">{r.notes}</div>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Delete confirm */}
-      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(o) => !o && setDeleteId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete record?</AlertDialogTitle>
@@ -377,7 +492,10 @@ export default function Records() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-red-600 hover:bg-red-600/90" onClick={handleDelete}>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-600/90"
+              onClick={handleDelete}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
