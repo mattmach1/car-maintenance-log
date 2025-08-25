@@ -38,6 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MoreHorizontal } from "lucide-react";
 import { loadVehicles, loadRecords, saveRecords } from "@/lib/storage";
 import { loadVehicleFilter, saveVehicleFilter } from "@/lib/storage";
+import { toCsv, downloadCsv } from "@/lib/csv";
 
 type Vehicle = {
   id: string;
@@ -231,6 +232,29 @@ export default function Records() {
     }`;
   }
 
+  function buildCsvRows(list: ServiceRecord[]) {
+  return list.map((r) => ({
+    Vehicle: vehicleLabel(r.vehicleId),
+    Type: TYPES.find((t) => t.value === r.type)?.label ?? r.type,
+    Date: r.serviceDate,
+    Mileage: r.mileage,
+    CostUSD: typeof r.costCents === "number" ? (r.costCents / 100).toFixed(2) : "",
+    Shop: r.shopName ?? "",
+    Notes: r.notes ?? "",
+  }));
+}
+
+function handleExportCsv() {
+  const rows = buildCsvRows(visibleRecords); // use your filtered list
+  const csv = toCsv(rows);
+  const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
+  const name =
+    vehicleFilter === "all"
+      ? `service-records-${stamp}.csv`
+      : `service-records-${vehicleLabel(vehicleFilter).replace(/\s+/g,"_")}-${stamp}.csv`;
+  downloadCsv(csv, name);
+}
+
   const visibleRecords = useMemo(() => {
   if (vehicleFilter === "all") return records;
   return records.filter(r => r.vehicleId === vehicleFilter);
@@ -261,6 +285,8 @@ export default function Records() {
             </SelectContent>
           </Select>
         </div>
+        
+         <Button variant="outline" onClick={handleExportCsv}>Export CSV</Button>
 
         <Dialog
           open={open}
