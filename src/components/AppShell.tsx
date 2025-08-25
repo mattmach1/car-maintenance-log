@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Settings } from "lucide-react";
+//import { Settings } from "lucide-react";
 import FooterNav from "./FooterNav";
-import { Button } from "@/components/ui/button";
+//import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AppShell({ children }: { children: ReactNode }) {
