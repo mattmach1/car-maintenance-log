@@ -30,16 +30,16 @@ Users can manage vehicles, log service records, track upcoming maintenance, expo
 ## 📸 Screenshots
 
 ### Dashboard
-![Dashboard screenshot](docs/screenshots/vehicle-log-dashboard-screenshot.png)
+![Dashboard screenshot](docs/screenshots/dashboard.png)
 
 ### Vehicles Page
-![Vehicles screenshot](docs/screenshots/vehicle-log-vehicles-screenshot.png)
+![Vehicles screenshot](docs/screenshots/vehicles.png)
 
 ### Records Page
-![Records screenshot](docs/screenshots/vehicle-log-records-screenshot.png)
+![Records screenshot](docs/screenshots/records.png)
 
 ### Reports page
-![Reports screenshot](docs/screenshots/vehicle-log-reports-screenshot.png)
+![Reports screenshot](docs/screenshots/reports.png)
 
 ---
 
